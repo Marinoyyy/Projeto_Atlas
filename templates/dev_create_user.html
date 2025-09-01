@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Novo Utilizador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header-com-voltar">
+            <a href="{{ url_for('dev_dashboard') }}" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+            <h1>Criar Novo Utilizador</h1>
+        </div>
+
+        <div class="form-container">
+            <form method="POST" class="add-colaborador-form">
+                <div class="form-group">
+                    <label for="email">Email do Colaborador</label>
+                    <input type="email" id="email" name="email" required placeholder="Digite o email corporativo do colaborador">
+                    <small>O nome e o cargo serão preenchidos automaticamente a partir da planilha de Colaboradores.</small>
+                </div>
+                <div class="form-group">
+                    <label for="temp_password">Senha Temporária</label>
+                    <input type="text" id="temp_password" name="temp_password" required>
+                </div>
+                <button type="submit" class="salvar-btn" style="width: 100%;">Criar Utilizador</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Equipa - {{ nome_grupo }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header-com-voltar">
+            <a href="{{ url_for('home') }}" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+            <h1>Equipa: {{ nome_grupo }}</h1>
+        </div>
+
+        <div class="colaborador-grid">
+            {% for membro in equipe %}
+                <a href="{{ url_for('detalhe_colaborador', colaborador_id=membro.id) }}" class="colaborador-item">
+                    <img src="{{ membro.foto }}" alt="Foto de {{ membro.Nome_completo }}">
+                    <span>{{ membro.Nome_completo.split(' ')[0] }}</span>
+                    <small style="color: #6c757d; font-size: 12px;">{{ membro.Cargo }}</small>
+                </a>
+            {% else %}
+                <p>Nenhum colaborador encontrado para este grupo.</p>
+            {% endfor %}
+        </div>
+        
+    </div>
+</body>
+</html>

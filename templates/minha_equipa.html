@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Equipa - Super Carômetro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <div style="background-color: #fff; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            Bem-vindo, <strong>{{ current_user.nome }}</strong>! (Cargo: {{ current_user.cargo }})
+        </div>
+        <a href="{{ url_for('logout') }}" style="color: #dc3545; text-decoration: none; font-weight: 600;">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </a>
+    </div>
+
+
+
+    <div class="header-dashboard" style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="{{ url_for('home') }}" class="back-btn" style="position: static; transform: none; width: auto;">
+            <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
+        <h1 style="margin: 0;">Minha Equipa</h1>
+        <div style="width: 180px;"></div> 
+    </div>
+
+
+        <div class="colaborador-grid" style="gap: 25px;">
+            {% for membro in equipa %}
+                <a href="{{ url_for('detalhe_colaborador', colaborador_id=membro.id) }}" class="colaborador-item">
+                    <div style="position: relative;">
+                        <img src="{{ membro.foto }}" alt="Foto de {{ membro.Nome_completo }}">
+                        <div class="overall" style="
+                            position: absolute;
+                            top: -10px;
+                            right: -10px;
+                            background-color: {{ get_cor_por_pontuacao(membro.overall) }};
+                            color: white;
+                            border-radius: 50%;
+                            width: 40px;
+                            height: 40px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-weight: bold;
+                            font-size: 18px;
+                            border: 3px solid white;
+                        ">{{ membro.overall }}</div>
+                    </div>
+                    <span>{{ membro.Nome_completo.split(' ')[0] }}</span>
+                    <small style="color: #6c757d;">{{ membro.Cargo }}</small>
+                </a>
+            {% else %}
+                <p>Não foram encontrados liderados diretos ou indiretos para si.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

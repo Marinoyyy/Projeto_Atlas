@@ -1,0 +1,60 @@
+{
+    "2": {
+        "nome": "Cristiane Canabrava Rodrigues",
+        "email": "cristiane.rodrigues@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$MW4178EdvUyazGIO$3bc684f3c492050ddaa3c2c3a58936167cfc87df1f175d7d72184c5c7c78fbb2",
+        "force_password_reset": true
+    },
+    "3": {
+        "nome": "Duarti Rosa Costa",
+        "email": "duarti.costa@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$HoAukexUHLd6jJIG$6f8e80ce40fb987a17775f3a9d8fe9f92c90d9d8f937f8362efe2efd1fb397be",
+        "force_password_reset": true
+    },
+    "4": {
+        "nome": "Felipe Lopes dos Santos",
+        "email": "felipe.lopes@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$3GHFT6OtCWiYwDMG$adb4fddbf2c0e3009214b6b6f294498b6bbbc4f96061f9ca986f5eb4b9ae1458",
+        "force_password_reset": true
+    },
+    "5": {
+        "nome": "John Karllos Lopes duarte",
+        "email": "john.k.duarte@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$Kdo9ti4siCdiY5xk$0505fbb40aedc7e267b880f8546930af97a13147c0c4dd48a8add8d1474e575a",
+        "force_password_reset": true
+    },
+    "6": {
+        "nome": "Flavio Barbosa da Silva",
+        "email": "flavio.silva@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$f4gqk6v8HypWxGuZ$953ea19d88b6e17fa82d7e46a328df9c667dfa8396e6919f7ce9de1001936675",
+        "force_password_reset": true
+    },
+    "7": {
+        "nome": "Gabriel Henrique Moura Nascimento",
+        "email": "gabriel.nascimento@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$RUiyNHYaDsb4PtEm$ffd3c11a6b3d9831f12d047f237691ff26d84aeb1658390ba8b9a0dbdd25678b",
+        "force_password_reset": true
+    },
+    "8": {
+        "nome": "Joao Paulo Ferreira",
+        "email": "joao.p.ferreira@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$OSNfT7WxaM0VbBXQ$4307c1df9ee2100ebe6fb737324b873015284d5f1bdeaa38b53e310629a84620",
+        "force_password_reset": true
+    },
+    "9": {
+        "nome": "Jose Evaldo Leite Chaves Junior",
+        "email": "jose.evaldo@grupoboticario.com.br",
+        "cargo": "Gerente",
+        "password": "pbkdf2:sha256:600000$jT4LOUEXdJJHnAf8$10b27438c6519efdc56801fc256b984d6057fa9214c13040c9bb589c60d428d7",
+        "force_password_reset": true
+    }
+  
+}
+

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Carômetro - Setores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <header class="main-header" style="background-color: #fff; padding: 10px 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div class="user-info">
+            Bem-vindo, <strong>{{ current_user.nome }}</strong>!
+        </div>
+        <nav class="main-nav" style="display: flex; gap: 15px;">
+            
+            {% if current_user.email == 'pedro.pereira@grupoboticario.com.br' %}
+                <a href="{{ url_for('dev_dashboard') }}" class="btn-detalhamento" style="background-color: #6f42c1; color: #fff;">
+                    <i class="fa-solid fa-shield-halved"></i> Área DEV
+                </a>
+            {% endif %}
+
+            {% if is_leader %}
+                <a href="{{ url_for('minha_equipa') }}" class="btn-detalhamento" style="background-color: #007bff; color: #fff;">
+                    <i class="fa-solid fa-users"></i> Minha Equipa
+                </a>
+            {% endif %}
+            <a href="{{ url_for('adicionar_colaborador') }}" class="btn-detalhamento" style="background-color: #17a2b8;">
+                <i class="fa-solid fa-user-plus"></i> Adicionar
+            </a>
+            <a href="{{ url_for('detalhamento_geral') }}" class="btn-detalhamento">
+                <i class="fa-solid fa-chart-line"></i> Detalhamento
+            </a>
+            <a href="{{ url_for('comparador') }}" class="btn-detalhamento">
+                <i class="fa-solid fa-users-line"></i> Comparador
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-detalhamento" style="background-color: #dc3545; color: #fff;">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="header-dashboard title center" style="margin-bottom: 40px;">
+            <h1>Avaliação Colaboradores (Setores)</h1>
+        </div>
+        
+        <div class="dashboard-grid">
+            {% for setor in setores %}
+                {# O link muda dependendo do tipo de card #}
+                {% if setor.tipo == 'cargo' %}
+                    <a href="{{ url_for('grid_grupo', nome_grupo=setor.nome) }}" class="setor-card" style="background-color: {{ setor.cor }};">
+                {% else %}
+                    <a href="{{ url_for('selecao_turno', nome_setor=setor.nome) }}" class="setor-card" style="background-color: {{ setor.cor }};">
+                {% endif %}
+                    <div class="icon"><i class="{{ setor.icone }}"></i></div>
+                    <div class="info">
+                        <h2>{{ setor.nome }}</h2>
+                        <p>{{ setor.contagem }} Colaboradores</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

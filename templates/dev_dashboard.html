@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Carômetro - Área DEV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header-com-voltar">
+            <a href="{{ url_for('dashboard_setores') }}" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+            <h1><i class="fa-solid fa-shield-halved"></i> Área de Administração</h1>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: .25rem; margin-bottom: 1rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="turno-section">
+            <h2>Gestão de Utilizadores</h2>
+            <div style="margin-bottom: 20px;">
+                <a href="{{ url_for('dev_create_user') }}" class="btn-detalhamento" style="background-color: #007bff;"><i class="fa-solid fa-user-plus"></i> Criar Novo Utilizador</a>
+            </div>
+            <h4>Utilizadores Atuais:</h4>
+            <ul style="list-style: none; padding: 0;">
+                {% for user in users %}
+                <li style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>{{ user.nome }}</strong> ({{ user.email }}) - Cargo: {{ user.cargo }}</span>
+                    {% if user.id != current_user.id %}
+                    <a href="{{ url_for('dev_delete_user', user_id=user.id) }}" onclick="return confirm('Tem a certeza que quer apagar este utilizador?')" style="color: #dc3545; text-decoration: none;">Apagar</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="turno-section">
+            <h2>Relatórios</h2>
+            <a href="{{ url_for('download_consolidado') }}" class="btn-detalhamento"><i class="fa-solid fa-file-excel"></i> Baixar Relatório Consolidado (Excel)</a>
+        </div>
+    </div>
+</body>
+</html>S
