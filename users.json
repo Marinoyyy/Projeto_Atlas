@@ -1,4 +1,11 @@
 {
+    "1": {
+        "nome": "Pedro Marinho Pereira",
+        "email": "pedro.pereira@grupoboticario.com.br",
+        "cargo": "T\u00e9cnico III - Log",
+        "password": "pbkdf2:sha256:600000$Sx7T2Vm1DgAqMHv5$b367772696ed2505f4b2d698182e3e6bd3d177d725dea95d262c28f651a30600",
+        "force_password_reset": true
+    },
     "2": {
         "nome": "Cristiane Canabrava Rodrigues",
         "email": "cristiane.rodrigues@grupoboticario.com.br",

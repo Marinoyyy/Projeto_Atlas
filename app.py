@@ -15,7 +15,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.types import JSON
 from functools import wraps
 from flask_migrate import Migrate
-
 # Carrega as variáveis de ambiente
 load_dotenv()
 
@@ -30,7 +29,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -821,11 +819,8 @@ def api_comparar():
     
 
 # --- INICIALIZAÇÃO DO SERVIDOR ---
-# --- INICIALIZAÇÃO DO SERVIDOR ---
 if __name__ == '__main__':
     with app.app_context():
         # Cria as tabelas se elas não existirem
-        db.create_all()
-    # A linha app.run() é removida ou comentada para produção
-    # app.run(debug=True)
-
+        db.create_all() 
+    app.run(debug=True)
