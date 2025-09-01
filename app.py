@@ -14,6 +14,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.types import JSON
 from functools import wraps
+from flask_migrate import Migrate
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -28,6 +29,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///sup
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -824,3 +828,4 @@ if __name__ == '__main__':
         db.create_all()
     # A linha app.run() é removida ou comentada para produção
     # app.run(debug=True)
+
