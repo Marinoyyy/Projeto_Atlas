@@ -817,8 +817,10 @@ def api_comparar():
     
 
 # --- INICIALIZAÇÃO DO SERVIDOR ---
+# --- INICIALIZAÇÃO DO SERVIDOR ---
 if __name__ == '__main__':
     with app.app_context():
         # Cria as tabelas se elas não existirem
-        db.create_all() 
-    app.run(debug=True)
+        db.create_all()
+    # A linha app.run() é removida ou comentada para produção
+    # app.run(debug=True)
