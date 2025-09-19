@@ -95,6 +95,28 @@
                         </div>
                     </div>
                     {% endfor %}
+
+                    {% if role == 'lider' %}
+                    <div class="atributo-principal-bloco">
+                        <div class="atributo-principal-header">
+                            <div class="atributo-principal-info"><i class="fa-solid fa-clipboard" style="color: #6c757d;"></i><span>Observações da Avaliação</span></div>
+                        </div>
+                        <div class="sub-atributos-lista">
+                            <textarea id="observacoes-avaliacao" name="observacoes" 
+                                      style="width: 100%; min-height: 120px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 14px;" 
+                                      placeholder="Adicione observações, pontos fortes, pontos de desenvolvimento ou feedbacks desta avaliação...">{{ colaborador.observacoes_atuais | default('', true) }}</textarea>
+                        </div>
+                    </div>
+                    {% elif colaborador.observacoes_atuais %}
+                    <div class="atributo-principal-bloco">
+                        <div class="atributo-principal-header">
+                            <div class="atributo-principal-info"><i class="fa-solid fa-clipboard" style="color: #6c757d;"></i><span>Observações da Avaliação</span></div>
+                        </div>
+                        <div class="sub-atributos-lista" style="padding: 10px; white-space: pre-wrap; color: #333;">
+                            {{ colaborador.observacoes_atuais }}
+                        </div>
+                    </div>
+                    {% endif %}
                     {% if role == 'lider' %}
                     <button type="submit" class="salvar-btn">Salvar Avaliação</button>
                     <div class="save-status"></div>
@@ -168,7 +190,7 @@
                 }
             });
 
-            // --- LÓGICA DE SUBMISSÃO DO FORMULÁRIO CORRIGIDA ---
+            // --- LÓGICA DE SUBMISSÃO DO FORMULÁRIO (ATUALIZADA PARA OBSERVAÇÕES) ---
             form.onsubmit = async (e) => {
                 e.preventDefault();
                 const status = form.querySelector('.save-status');
@@ -176,16 +198,26 @@
                 
                 const sub_atributos = {};
                 const formData = new FormData(form);
+                
+                // 1. Criar variável para as observações
+                let observacoes_texto = '';
+
                 for (let [key, value] of formData.entries()) {
-                    if (key !== 'processo') {
-                        sub_atributos[key] = value;
+                    // 2. Capturar os campos pelo nome
+                    if (key === 'processo') {
+                        // ignora
+                    } else if (key === 'observacoes') {
+                        observacoes_texto = value; // Guarda o texto das observações
+                    } else {
+                        sub_atributos[key] = value; // Guarda os scores dos atributos
                     }
                 }
                 
                 const data = {
                     nome_completo: "{{ colaborador.Nome_completo }}",
                     processo: formData.get('processo'),
-                    sub_atributos: sub_atributos
+                    sub_atributos: sub_atributos,
+                    observacoes: observacoes_texto // <-- 3. Enviar o texto para a API
                 };
                 
                 const response = await fetch('/api/salvar_avaliacao', {

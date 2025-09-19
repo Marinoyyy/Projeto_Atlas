@@ -75,8 +75,20 @@ INSIGNIAS_DISPONIVEIS = {
     "comunicador": {"icone": "fa-solid fa-comments", "titulo": "Comunicador", "descricao": "Possui habilidades excepcionais de comunicação e relacionamento."},
     "inovador": {"icone": "fa-solid fa-lightbulb", "titulo": "Inovador", "descricao": "Propõe novas ideias e melhorias para os processos existentes."},
     "polivalente": {"icone": "fa-solid fa-star", "titulo": "Polivalente", "descricao": "Adapta-se com facilidade a diferentes funções e desafios."},
-    "consistencia": {"icone": "fa-solid fa-calendar-check", "titulo": "Consistência", "descricao": "Exemplo de regularidade, presença e pontualidade."}
-}
+    "consistencia": {"icone": "fa-solid fa-calendar-check", "titulo": "Consistência", "descricao": "Exemplo de regularidade, presença e pontualidade."},
+    "Especialista em Reabastecimento": {"icone": "fa-solid fa-warehouse", "titulo": "Especialista em Reabastecimento", "descricao": "Demonstra excelência e profundo conhecimento na função de Reabastecimento."},
+    "Especialista em Recebimento": {"icone": "fa-solid fa-truck", "titulo": "Especialista em Recebimento", "descricao": "Demonstra excelência e profundo conhecimento na função de Recebimento."},
+    "Especialista em Expedição": {"icone": "fa-solid fa-box", "titulo": "Especialista em Expedição", "descricao": "Demonstra excelência e profundo conhecimento na função de Expedição."},
+    "Especialista em Controle de Estoque": {"icone": "fa-solid fa-clipboard-list", "titulo": "Especialista em Controle de Estoque", "descricao": "Demonstra excelência e profundo conhecimento na função de Controle de Estoque."},
+    "Especialista em Picking": {"icone": "fa-solid fa-cart-shopping", "titulo": "Especialista em Picking", "descricao": "Demonstra excelência e profundo conhecimento na função de Picking."},
+    "Especialista em Checkout": {"icone": "fa-solid fa-cash-register", "titulo": "Especialista em Checkout", "descricao": "Demonstra excelência e profundo conhecimento na função de Checkout."},
+    "Especialista em Loja": {"icone": "fa-solid fa-store", "titulo": "Especialista em Loja", "descricao": "Demonstra excelência e profundo conhecimento na função de Loja."},
+    "Principiante em Bw's": {"icone": "fa-solid fa-seedling", "titulo": "Principiante em BWS", "descricao": "Participou apenas de 1 Beauty Week."},
+    "Intermediário em Bw's": {"icone": "fa-solid fa-leaf", "titulo": "Intermediário em BWS", "descricao": "Participou de 2 a 3 Beauty Weeks, mostrando interesse em crescimento."},
+    "Experiente em Bw's": {"icone": "fa-solid fa-tree", "titulo": "Experiente em BWS", "descricao": "Participou de 4 a 5 Beauty Weeks, demonstrando comprometimento."},
+    "Senior em Bw's": {"icone": "fa-solid fa-dungeon", "titulo": "Senior em BWS", "descricao": "Participou de 6 a 7 Beauty Weeks, sendo referência entre os colegas."},
+    "Mestre em Bw's": {"icone": "fa-solid fa-crown", "titulo": "Mestre em BWS", "descricao": "Participou de 8 ou mais Beauty Weeks, exemplo de dedicação e paixão."}
+    }
 
 # --- DECORADOR DE PERMISSÃO ---
 def admin_required(f):
@@ -121,6 +133,8 @@ class Avaliacao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     colaborador_id = db.Column(db.Integer, db.ForeignKey('colaboradores.id'), nullable=False)
     atributos = db.Column(JSON)
+    # --- CAMPO ADICIONADO ---
+    observacoes = db.Column(db.Text, nullable=True) # Usamos db.Text para textos longos
 
 class Insignia(db.Model):
     __tablename__ = 'insignias'
@@ -186,7 +200,7 @@ def converter_score_para_estrelas(score):
     if score > 0: return 1
     return 0
     
-# --- FUNÇÃO PRINCIPAL DE BUSCA DE DADOS ---
+# --- FUNÇÃO PRINCIPAL DE BUSCA DE DADOS (ATUALIZADA) ---
 def get_dados_completos():
     colaboradores_db = Colaborador.query.filter(Colaborador.processo != 'Desligado').all()
     colaboradores_list = []
@@ -211,6 +225,9 @@ def get_dados_completos():
         avaliacao = Avaliacao.query.filter_by(colaborador_id=c.id).first()
         notas_sub_atributos = avaliacao.atributos if avaliacao and avaliacao.atributos else {}
         
+        # --- LINHA ADICIONADA ---
+        observacoes_atuais = avaliacao.observacoes if avaliacao and avaliacao.observacoes else ""
+        
         colaborador_dict['atributos_detalhados'] = []
         for attr_principal, sub_attrs in ESTRUTURA_ATRIBUTOS.items():
             soma_sub = sum(int(notas_sub_atributos.get(sub, 50)) for sub in sub_attrs)
@@ -225,6 +242,9 @@ def get_dados_completos():
 
         pdi_db = PDI.query.filter_by(colaborador_id=c.id).all()
         colaborador_dict['pdi'] = [{'id': p.id, 'descricao': p.descricao, 'prazo': p.prazo, 'status': p.status} for p in pdi_db]
+        
+        # --- LINHA ADICIONADA ---
+        colaborador_dict['observacoes_atuais'] = observacoes_atuais
         
         colaboradores_list.append(colaborador_dict)
 
@@ -597,7 +617,8 @@ def detalhamento_geral():
         stats_times[turno] = sorted(stats_times[turno], key=lambda x: x['media_overall'], reverse=True)
         
     return render_template('detalhamento_geral.html', dados_agrupados=dados_agrupados, stats_times=stats_times)
-# --- ROTAS DE API (Atualizadas para o DB) ---
+
+# --- ROTAS DE API (ATUALIZADAS PARA O DB E OBSERVAÇÕES) ---
 @app.route('/api/salvar_avaliacao', methods=['POST'])
 @login_required
 def salvar_avaliacao_api():
@@ -605,6 +626,9 @@ def salvar_avaliacao_api():
     nome_colaborador = dados.get('nome_completo')
     processo_colaborador = dados.get('processo')
     sub_atributos_recebidos = dados.get('sub_atributos', {})
+    
+    # --- 1. RECEBER O NOVO CAMPO DE OBSERVAÇÕES DO JAVASCRIPT ---
+    observacoes_texto = dados.get('observacoes', None)
 
     # --- LINHA CORRIGIDA ---
     # Converte todos os valores recebidos para inteiros
@@ -620,6 +644,9 @@ def salvar_avaliacao_api():
         avaliacao = Avaliacao(colaborador_id=colaborador.id)
         db.session.add(avaliacao)
     avaliacao.atributos = notas_numericas # Salva as notas já convertidas
+    
+    # --- 2. SALVAR AS OBSERVAÇÕES NA BASE DE DADOS ---
+    avaliacao.observacoes = observacoes_texto
 
     # Calcula o overall e salva no histórico
     overall_calculado = calcular_overall_com_notas(notas_numericas, processo_colaborador) # Usa as notas convertidas
