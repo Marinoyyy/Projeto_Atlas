@@ -250,6 +250,29 @@ def get_dados_completos():
 
     return colaboradores_list
 
+def get_posicao_9box(score_tecnica, score_comportamento):
+    """Função auxiliar para calcular a posição na matriz 9-Box."""
+    def get_posicao(score):
+        if score >= 80: return 2
+        if score >= 60: return 1
+        return 0
+
+    pos_x = get_posicao(score_comportamento)
+    pos_y = get_posicao(score_tecnica)
+    
+    # Mapeia as coordenadas (linha, coluna) para os títulos corretos
+    # O cálculo (2 - pos_y) inverte o eixo Y para corresponder à matriz visual (Alto Potencial no topo)
+    # Títulos atualizados conforme a imagem image_3e0dcd.png
+    titulos_matriz = [
+        ["Pode mais", "Faz bonito", "Muda o Jogo"],     # Linha 0 (Técnica Alta: [Baixo, Médio, Alto Comp])
+        ["Precisa Agir", "Mantenedor", "Faz Bonito"],   # Linha 1 (Técnica Média)
+        ["Precisa Agir", "Pode Mais", "Precisa Agir"]   # Linha 2 (Técnica Baixa)
+    ]
+    
+    return titulos_matriz[2 - pos_y][pos_x]
+
+
+
 # --- ROTAS DE AUTENTICAÇÃO ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -773,7 +796,7 @@ def matriz_talentos(nome_setor, num_turno):
         and c.get('Cargo') in ['Operacional', 'Op Empilhadeira']
     ]
     matriz = [[[], [], []], [[], [], []], [[], [], []]]
-    titulos_matriz = [["Enigma", "Forte Desempenho", "Alto Potencial"], ["Questionável", "Mantenedor", "Forte Desempenho"], ["Inadequado", "Questionável", "Risco"]]
+    titulos_matriz = [["Pode mais", "Faz bonito", "Muda o Jogo"], ["Precisa Agir", "Mantenedor", "Faz Bonito"], ["Precisa Agir", "Pode Mais", "Precisa Agir"]]
     
     def get_posicao(score):
         if score >= 80: return 2
@@ -844,6 +867,60 @@ def api_comparar():
         traceback.print_exc()
         return jsonify({"erro": "Ocorreu um erro interno no servidor."}), 500
     
+@app.route('/dashboard_analitico')
+@login_required
+def dashboard_analitico():
+    
+    # --- LÓGICA PARA O GRÁFICO 9-BOX ---
+    colaboradores = get_dados_completos()
+    colaboradores_operacionais = [
+        c for c in colaboradores 
+        if c.get('Cargo') in ['Operacional', 'Op Empilhadeira']
+    ]
+
+    # Nova lista de títulos ÚNICOS, ordenados por importância para o gráfico
+    titulos_para_grafico = ["Muda o Jogo", "Faz bonito", "Pode mais", "Mantenedor", "Precisa Agir"]
+    titulos_invertidos_grafico = titulos_para_grafico[::-1] # Inverte para a ordem correta no gráfico de barras horizontal
+
+    # Estrutura para armazenar as contagens (agora com 5 categorias únicas)
+    dados_grafico_9box = {titulo: {'total': 0, 'turno_1': 0, 'turno_2': 0} for titulo in titulos_invertidos_grafico}
+
+    for c in colaboradores_operacionais:
+        atributos = {item['nome_principal']: item['valor_principal'] for item in c['atributos_detalhados']}
+        score_tecnica = atributos.get('Tecnica', 0)
+        score_comportamento = atributos.get('Comportamento', 0)
+        
+        # Obtém o nome da caixa (ex: "Alto Potencial")
+        nome_caixa = get_posicao_9box(score_tecnica, score_comportamento)
+        
+        turno_num = c.get('Turno_Num')
+
+        if nome_caixa in dados_grafico_9box:
+            dados_grafico_9box[nome_caixa]['total'] += 1
+            if turno_num == 1:
+                dados_grafico_9box[nome_caixa]['turno_1'] += 1
+            elif turno_num == 2:
+                dados_grafico_9box[nome_caixa]['turno_2'] += 1
+
+    # --- LÓGICA PARA O FILTRO DE INSÍGNIAS ---
+    insignia_selecionada_id = request.args.get('insignia_id')
+    colaboradores_com_insignia = []
+
+    if insignia_selecionada_id:
+        # Query que junta Colaboradores e Insignias e filtra pelo ID da insígnia
+        colaboradores_com_insignia = db.session.query(Colaborador)\
+            .join(Insignia, Colaborador.id == Insignia.colaborador_id)\
+            .filter(Insignia.insignia_id == insignia_selecionada_id)\
+            .all()
+
+    return render_template(
+        'dashboard_analitico.html',
+        insignias_disponiveis=INSIGNIAS_DISPONIVEIS,
+        dados_grafico_9box=dados_grafico_9box,
+        titulos_matriz_flat=titulos_invertidos_grafico,
+        insignia_selecionada_id=insignia_selecionada_id,
+        colaboradores_com_insignia=colaboradores_com_insignia
+    )
 
 # --- INICIALIZAÇÃO DO SERVIDOR ---
 if __name__ == '__main__':
