@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Projeto Atlas - Análise de Talentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-com-voltar">
+            <a href="{{ url_for('dashboard_setores') }}" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+            <h1>Análise de Talentos</h1>
+        </div>
+
+        <section class="turno-section">
+            <h2><i class="fa-solid fa-award"></i> Localizador de Talentos (Por Insígnia)</h2>
+            <p style="margin-top: -10px; margin-bottom: 20px;">Selecione uma competência para encontrar todos os colaboradores que a possuem.</p>
+
+            <form method="GET" action="{{ url_for('dashboard_analitico') }}" class="change-sector-form" style="margin-top: 0; max-width: none; text-align: left; flex-direction: row; gap: 15px; align-items: flex-end;">
+                <div style="flex-grow: 1;">
+                    <label for="insignia-select" style="font-size: 16px;">Selecione a Insígnia:</label>
+                    <select name="insignia_id" id="insignia-select" required>
+                        <option value="">-- Escolha uma insígnia --</option>
+                        {% for id, insignia in insignias_disponiveis.items()|sort(attribute='1.titulo') %}
+                            <option value="{{ id }}" {% if id == insignia_selecionada_id %}selected{% endif %}>
+                                {{ insignia.titulo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="salvar-btn" style="width: auto; padding: 12px 30px; margin-top: 0;">Buscar</button>
+            </form>
+
+            {% if insignia_selecionada_id %}
+                <h3 style="border-top: 1px solid #eee; padding-top: 25px; margin-top: 30px;">
+                    Resultados para: <i class="{{ insignias_disponiveis[insignia_selecionada_id].icone }}"></i> <strong>{{ insignias_disponiveis[insignia_selecionada_id].titulo }}</strong>
+                </h3>
+                <div class="colaborador-grid" style="justify-items: start; gap: 30px; margin-top: 20px;">
+                    {% for colaborador in colaboradores_com_insignia %}
+                        <a href="{{ url_for('detalhe_colaborador', colaborador_id=colaborador.id) }}" class="colaborador-item">
+                            <img src="{{ colaborador.foto_url or url_for('static', filename='images/default_avatar.png') }}" alt="Foto de {{ colaborador.nome_completo }}">
+                            <span>{{ colaborador.nome_completo.split(' ')[0] }}</span>
+                            <small style="color: #6c757d; font-size: 12px;">{{ colaborador.processo }} ({{colaborador.turno}})</small>
+                        </a>
+                    {% else %}
+                        <p>Nenhum colaborador encontrado com esta insígnia.</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="turno-section">
+            <h2><i class="fa-solid fa-th"></i> Distribuição de Talentos (9-Box)</h2>
+            
+            <div class="role-toggle-container" style="justify-content: center; gap: 10px; margin-bottom: 30px;">
+                <button type="button" class="role-toggle-btn filter-btn active" data-filter="total">Consolidado</button>
+                <button type="button" class="role-toggle-btn filter-btn" data-filter="turno_1">1º Turno</button>
+                <button type="button" class="role-toggle-btn filter-btn" data-filter="turno_2">2º Turno</button>
+            </div>
+
+            <div class="comparison-chart-container" style="padding: 15px; box-shadow: none;">
+                <canvas id="nineBoxChart"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Bloco de dados injetado pelo Flask (Python)
+        const dadosGrafico = {{ dados_grafico_9box | tojson }};
+        const chartLabels = {{ titulos_matriz_flat | tojson }};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('nineBoxChart').getContext('2d');
+            let nineBoxChart = null; // Variável para guardar a instância do gráfico
+
+            /**
+             * Função para renderizar o gráfico com base em um filtro de turno ('total', 'turno_1' ou 'turno_2')
+             */
+            function renderizarGrafico(filtroTurno) {
+                // Mapeia os nossos dados completos para extrair apenas a contagem do filtro selecionado
+                const dataPoints = chartLabels.map(label => {
+                    return dadosGrafico[label] ? dadosGrafico[label][filtroTurno] : 0;
+                });
+
+                const chartData = {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Nº de Colaboradores',
+                        data: dataPoints,
+                        backgroundColor: [ // Cores baseadas na matriz (alto potencial verde, risco vermelho, etc)
+                            'rgba(255, 159, 64, 0.7)', // Enigma
+                            'rgba(54, 162, 235, 0.7)', // Forte Desempenho
+                            'rgba(75, 192, 192, 0.7)', // Alto Potencial
+                            'rgba(255, 206, 86, 0.7)', // Questionável
+                            'rgba(153, 102, 255, 0.7)', // Mantenedor
+                            'rgba(54, 162, 235, 0.7)', // Forte Desempenho (repetido)
+                            'rgba(255, 99, 132, 0.7)', // Inadequado
+                            'rgba(255, 206, 86, 0.7)', // Questionável (repetido)
+                            'rgba(201, 203, 207, 0.7)'  // Risco
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                };
+
+                // Destrói o gráfico anterior antes de desenhar um novo
+                if (nineBoxChart) {
+                    nineBoxChart.destroy();
+                }
+
+                // Cria o novo gráfico
+                nineBoxChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        indexAxis: 'y', // Faz o gráfico ser de barras horizontais
+                        responsive: true,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Quantidade de Colaboradores' }
+                            },
+                            y: {
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: `Distribuição 9-Box (${filtroTurno.replace('_', ' ').toUpperCase()})`
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Adiciona os eventos de clique aos botões de filtro
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove a classe 'active' de todos e adiciona apenas ao clicado
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Renderiza o gráfico novamente com o filtro do botão (ex: 'data-filter="turno_1"')
+                    renderizarGrafico(this.dataset.filter);
+                });
+            });
+
+            // Renderização inicial do gráfico (Consolidado/Total)
+            renderizarGrafico('total');
+        });
+    </script>
+</body>
+</html>
